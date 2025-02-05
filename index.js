@@ -13,10 +13,31 @@ app.use(cors());
 
 // Get Test Api
 app.get("/test-ai", async (req, res) => {
-  const prompt = req.query.text;
+  const prompt = req.query?.text;
+  if (!prompt) {
+    return res.send({ message: "Please provide a prompt" });
+  }
   const result = await model.generateContent(prompt);
 
   res.send(result.response.text());
+});
+
+// Json Data Generate
+app.get("/generate-json", async (req, res) => {
+  const prompt = req.query?.prompt;
+  if (!prompt) {
+    return res.send({ message: "Please provide a prompt" });
+  }
+
+  const FinalPrompt = ` generate json data of this ${prompt}  using this JSON schema:
+
+Output = {'property': value}
+Return: Array<Output>`;
+
+  const result = await model.generateContent(FinalPrompt);
+  const Output = result.response.text().slice(7, -4);
+  const JsonData = JSON.parse(Output);
+  res.send(JsonData);
 });
 
 // Basic Code
